@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CS1DII" board="Alchitry Au" language="Lucid" version="3">
+  <files>
+    <src>one_hot_check.luc</src>
+    <src>verify_input.luc</src>
+    <src>shifter.luc</src>
+    <component>pipeline.luc</component>
+    <src>control.luc</src>
+    <src>mult16bit.luc</src>
+    <src>selectiondecoder.luc</src>
+    <component>counter.luc</component>
+    <src>fulladder.luc</src>
+    <src>adder16bit.luc</src>
+    <component>decoder.luc</component>
+    <src>encoder_custom.luc</src>
+    <src>part2.luc</src>
+    <src>divider.luc</src>
+    <src>boolean.luc</src>
+    <src>fsmCL.luc</src>
+    <src top="true">au_top.luc</src>
+    <src>seven_seg.luc</src>
+    <src>part45_7seg_and_led.luc</src>
+    <component>reset_conditioner.luc</component>
+    <component>edge_detector.luc</component>
+    <src>comp16bit.luc</src>
+    <component>button_conditioner.luc</component>
+    <constraint>io_costumised.acf</constraint>
+    <constraint lib="true">alchitry.acf</constraint>
+    <constraint>costumized.xdc</constraint>
+  </files>
+</project>

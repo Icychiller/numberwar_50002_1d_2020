@@ -1,0 +1,47 @@
+module verify_input (
+    //input clk,  // clock
+    //input rst,  // reset
+    input inputA[10],
+    input inputB[10],
+    input numCheckA[10],
+    input numCheckB[10],
+    output outA[4],
+    output outB[4],
+    output error,
+    output errora,
+    output errorb
+  ) {
+  sig validA[10];
+  sig validB[10];
+  var i;
+  
+  // One-Hot Checker Modules
+  one_hot_check checkHotA;
+  one_hot_check checkHotB;
+  
+  // Custom One-Hot to Binary Modules
+  encoder_custom encodeA;
+  encoder_custom encodeB;
+  
+  always {
+    
+    // Initial Comparison AND Gates
+    for (i=0;i<10;i++){
+      validA[i] = inputA[i] & numCheckA[i];
+      validB[i] = inputB[i] & numCheckB[i];
+    }
+    
+    // Custom One-Hot Checking
+    checkHotA.bitcheck = validA;
+    checkHotB.bitcheck = validB;
+    error = checkHotA.out || checkHotB.out;
+    
+    // One-Hot to Binary Conversion
+    encodeA.in = validA;
+    encodeB.in = validB;
+    outA = encodeA.out;
+    outB = encodeB.out;
+    errora = checkHotA.out;
+    errorb = checkHotB.out;
+  }
+}

@@ -1,0 +1,32 @@
+module one_hot_check (
+    input bitcheck[10],
+    output out
+  ) {
+  
+  var i;
+  
+  sig cascadeOR[8];
+  sig chainAND[9];
+  sig oneHot;
+  sig active;
+  
+  always {
+    // 8 cascading OR gates for bit-wise iteration
+    cascadeOR[0] = bitcheck[0] | bitcheck[1];
+    for (i=1;i<8;i++){
+      cascadeOR[i] = cascadeOR[i-1] | bitcheck[i+1];
+    }
+    // 9 AND gates to check for >1 valid inputs (Not One-Hot)
+    chainAND[0] = bitcheck[0] & bitcheck[1];
+    for (i=1;i<9;i++){
+      chainAND[i]= cascadeOR[i-1] & bitcheck[i+1];
+    }
+    // if Any AND gates are active, >1 valid inputs are detected
+    oneHot = |chainAND;
+    
+    // 10-input NOR gate checks for 0 valid inputs. (e.g. no switches are on)
+    active = ~(|bitcheck);  
+    
+    out = oneHot | active;
+  }
+}

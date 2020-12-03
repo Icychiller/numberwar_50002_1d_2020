@@ -1,0 +1,157 @@
+module control (
+    input inputA[16],           // 16-bit Input Signal
+    input inputB[16],
+    input alufn[6],         // 6-bit ALUFN Input Signal
+    output out[16],         // 16-bit Output Signal
+    output z,               // outputs for Adder Conditions
+    output v,
+    output n,
+    output alufnexception   // Exception Signal for ALUFN Error
+  ){
+  
+  // Instantiation of ALU Modules
+  adder16bit adder16bit;
+  comp16bit comp16bit;
+  mult16bit mult16bit;
+  shifter shifter;
+  boolean boolean;
+  divider divider;
+  
+  
+  always {
+
+
+    
+    //**********************************//
+    // Input Assignemnt for ALU Modules //
+    //**********************************//
+    
+    // Adder Module
+    adder16bit.a = inputA;
+    adder16bit.b = inputB;
+    adder16bit.alufn0 = alufn[0];
+    
+    // Comparator Module
+    comp16bit.z = adder16bit.z;
+    comp16bit.v = adder16bit.v;
+    comp16bit.n = adder16bit.n;
+    comp16bit.alufn = alufn[2:1];
+    
+    // Shifter Module
+    shifter.a = inputA;
+    shifter.b = inputB[3:0];
+    shifter.alufn = alufn[1:0];
+    
+    // Boolean Module
+    boolean.a = inputA;
+    boolean.b = inputB;
+    boolean.alufn = alufn[3:0];
+    
+    // Multiplier Module
+    mult16bit.a = inputA;
+    mult16bit.b = inputB;
+    
+    // Divider Module
+    divider.a = inputA;
+    divider.b = inputB;
+    
+    //************************************//
+    // Output Assignments for ALU Modules //
+    //************************************//
+    
+    // Adder ZVN output
+    z = adder16bit.z;
+    v = adder16bit.v;
+    n = adder16bit.n;
+    
+    // Module Outputs
+    // All Valid ALUFN are logged in this Case function. 
+    // Any Invalid ALUFN Values outputs alufnexception signal by default. 16-bit output is also set to 0.
+    case(alufn[5:0]){
+        b000000:
+          out = adder16bit.s;
+          alufnexception = 0;
+        b000001:
+          out = adder16bit.s;
+          alufnexception = 0;
+        b000010:
+          out = mult16bit.out;
+          alufnexception = 0;
+        b000100:
+          out = divider.quotient;
+          alufnexception = 0;
+        b000110:
+          out = divider.remainder;
+          alufnexception = 0;
+        b110011:
+          out = comp16bit.out;
+          alufnexception = 0;
+        b110101:
+          out = comp16bit.out;
+          alufnexception = 0;
+        b110111:
+          out = comp16bit.out;
+          alufnexception = 0;
+        b100000:
+          out = shifter.s;
+          alufnexception = 0;
+        b100001:
+          out = shifter.s;
+          alufnexception = 0;
+        b100011:
+          out = shifter.s;
+          alufnexception = 0;
+        b010000:
+          out = boolean.s;
+          alufnexception = 0;
+        b010001:
+          out = boolean.s; 
+          alufnexception = 0;
+        b010010:
+          out = boolean.s;
+          alufnexception = 0;
+        b010011:
+          out = boolean.s;
+          alufnexception = 0;
+        b010100:
+          out = boolean.s;
+          alufnexception = 0;
+        b010101:
+          out = boolean.s;
+          alufnexception = 0;
+        b010110:
+          out = boolean.s;
+          alufnexception = 0;
+        b010111:
+          out = boolean.s; 
+          alufnexception = 0;
+        b011000:
+          out = boolean.s;
+          alufnexception = 0;
+        b011001:
+          out = boolean.s;
+          alufnexception = 0;
+        b011010:
+          out = boolean.s;
+          alufnexception = 0;
+        b011011:
+          out = boolean.s;
+          alufnexception = 0;
+        b011100:
+          out = boolean.s;
+          alufnexception = 0;
+        b011101:
+          out = boolean.s;
+          alufnexception = 0;
+        b011110:
+          out = boolean.s;
+          alufnexception = 0;
+        b011111:
+          out = boolean.s;
+          alufnexception = 0;
+        default:
+        out = 16b0;
+        alufnexception = 1;
+    }
+  }
+}

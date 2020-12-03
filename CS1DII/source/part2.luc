@@ -1,0 +1,230 @@
+module part2 (
+    input clk,            // clock
+    input rst,            // reset
+    
+    input inputA[16],         //0
+    input inputB[16],         //1
+    //2 10 bit 0
+    input fse1[2],        //Selector
+    //2 10 bit 1
+    input fse2[2],        //Selector
+    
+    input ohtb_A_out[16],     //connect to input A reg
+    input ohtb_B_out[16],     //connect to input B reg
+    input we,             //Control input A and B
+    output scoreselect[8],
+    //0 to inputA
+    //1 to inputB
+    //3 to fse2_out
+    input asel[2],         //Selector
+    //score register enables
+    input sa[2],
+    input sb[2],
+    //numcheck register enables
+    input wna[2],
+    input wnb[2],
+    input tempen,
+    //score score select
+    input sse,
+    output a[16],
+    output b[16],
+    output aluina[16],
+    output aluinb[16],
+    output holdreg[16],
+    //0 to inputB
+    //1 to inputA,
+    input hen,     //2
+    //3 to fse1_out,
+    input bsel[2],         //Selector
+    //visual outpputs
+    output digitA[8],
+    output digitB[8],
+    output digitC[8],
+    output digitD[8],
+    input alufn[6],
+    output alu[16],
+    output z,
+    output numAcheck[10],
+    output numBcheck[10],
+    output scorea[8],
+    output scoreb[8]
+  ) {
+  sig score_select_out[8];
+  sig fse1_mux_out[16], fse2_mux_out[16], asel_mux_out[16], bsel_mux_out[16];
+  // input A and input B Registers
+  dff input_a[16](#INIT(0), .clk(clk), .rst(rst));
+  dff input_b[16](#INIT(0), .clk(clk), .rst(rst));
+  dff holding[16](#INIT(0), .clk(clk), .rst(rst));
+  dff scoreA[8](#INIT(0), .clk(clk), .rst(rst));
+  dff scoreB[8](#INIT(0), .clk(clk), .rst(rst));
+  dff numcheckA[10](#INIT(0), .clk(clk), .rst(rst));
+  dff numcheckB[10](#INIT(0), .clk(clk), .rst(rst));
+  dff outTemp[16](#INIT(0), .clk(clk), .rst(rst));
+  part45_7seg_and_led segandled;  
+  //Init ALU
+  control control;
+  
+  always {
+    a = inputA;
+    b = inputB;
+    //ALU
+      //Input
+    control.alufn = alufn;
+    //in will be defined later
+      //Output
+    z = control.z;
+    alu = control.out[15:0];
+    
+    //reg
+    if (we == 0){
+      input_a.d = input_a.q;
+      input_b.d = input_b.q;
+    } else{
+      input_a.d = ohtb_A_out;
+      input_b.d = ohtb_B_out;
+    }
+    //score select mux
+    case(sse){
+      b1:
+      score_select_out = scoreB.q;
+      b0:
+      score_select_out = scoreA.q;
+      default:
+      score_select_out = 8b0;
+    }
+    scoreselect = score_select_out;
+    //fse1 mux 
+    case (fse1[1:0]){
+      b00:
+        fse1_mux_out = inputA;
+      b01:
+        fse1_mux_out = inputB;
+      b10:
+        fse1_mux_out = 16b0;
+      default:
+        fse1_mux_out = 16b0;
+    }
+    
+    //fse2_mux 
+    case (fse2[1:0]){
+      b00:
+        fse2_mux_out = numcheckA.q;
+      b01:
+        fse2_mux_out = numcheckB.q;
+      b10:
+        fse2_mux_out = b0000001111111111;
+      default:
+        fse2_mux_out = 16b0;
+    }
+    
+    //asel_mux 
+    case (asel[1:0]){
+      b00:
+        asel_mux_out = input_a.q;
+      b01:
+        asel_mux_out = input_b.q;
+      b10:
+        asel_mux_out[7:0] = score_select_out;
+        asel_mux_out[15:8] = 8b0;
+      b11:
+        asel_mux_out = fse2_mux_out;
+      default:
+        asel_mux_out = 16b0;
+    }
+    
+    //bsel_mux
+    case (bsel[1:0]){
+      b00:
+        bsel_mux_out = input_b.q;
+      b01:
+        bsel_mux_out = input_a.q;
+      b10:
+        bsel_mux_out = holding.q;
+      b11:
+        bsel_mux_out = fse1_mux_out;
+      default:
+        bsel_mux_out = 16b0;
+    }
+    //outTemp register
+    case(tempen){
+      b1:
+      outTemp.d = control.out;
+      b0:
+      outTemp.d = outTemp.q;
+      default:
+      outTemp.d = outTemp.q;
+    }
+      
+    //holding register
+    case(hen){
+      b1:
+      holding.d = outTemp.q;
+      b0:
+      holding.d = holding.q;
+      default:
+      holding.d = holding.q;
+    }    
+    //score registers
+    case(sa){
+      b01:
+      scoreA.d = outTemp.q[7:0];
+      b00:
+      scoreA.d = scoreA.q;
+      b11:
+      scoreA.d = control.out[7:0];
+      default:
+      scoreA.d = scoreA.q;
+    }
+    case(sb){
+      b01:
+      scoreB.d = outTemp.q[7:0];
+      b00:
+      scoreB.d = scoreB.q;
+      b11:
+      scoreB.d = control.out[7:0];
+      default:
+      scoreB.d = scoreB.q;
+    }
+    //numcheck registers
+    case(wna){
+      b01:
+      numcheckA.d = outTemp.q[9:0];
+      b00:
+     numcheckA.d = numcheckA.q;
+      b11:
+      numcheckA.d = control.out[9:0];
+      default:
+      numcheckA.d = numcheckA.q;
+    }
+    case(wnb){
+      b01:
+      numcheckB.d = outTemp.q[9:0];
+      b00:
+      numcheckB.d = numcheckB.q;
+      b11:
+      numcheckB.d = control.out[9:0];
+      default:
+      numcheckB.d = numcheckB.q;
+    }
+    //alu
+    control.inputA = asel_mux_out;
+    control.inputB = bsel_mux_out;
+    aluina = asel_mux_out;
+    aluinb = bsel_mux_out;
+    //7seg and LED decoder init
+    //segandled.scoreA =scoreA.q;
+    segandled.scoreA = scoreA.q;
+    segandled.scoreB = scoreB.q;
+    //numcheck to LED
+    digitB = segandled.digitB;
+    digitA = segandled.digitA;
+    digitD = segandled.digitD;
+    digitC = segandled.digitC; 
+    //numcheck
+    numAcheck = numcheckA.q;
+    numBcheck = numcheckB.q;
+    holdreg = holding.q;
+    scorea = scoreA.q;
+    scoreb = scoreB.q;
+  }
+}

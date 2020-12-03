@@ -1,0 +1,83 @@
+pin outA[0] C24;
+pin outA[1] C21;
+pin outA[2] C18;
+pin outA[3] C15;
+pin outA[4] C12;
+pin outA[5] C9;
+pin outA[6] C6;
+pin outA[7] C3;
+pin outA[8] C2;
+pin outA[9] C5;
+
+pin outB[0] C8;
+pin outB[1] C11;
+pin outB[2] C14;
+pin outB[3] C17;
+pin outB[4] C20;
+pin outB[5] C23;
+pin outB[6] C27;
+pin outB[7] C30;
+pin outB[8] C33;
+pin outB[9] C36;
+
+pin digitA[0] A23;
+pin digitA[1] A20;
+pin digitA[2] A17;
+pin digitA[3] A14;
+pin digitA[4] A11;
+pin digitA[5] A8;
+pin digitA[6] A5;
+pin digitA[7] A2;
+
+pin digitB[0] A24;
+pin digitB[1] A21;
+pin digitB[2] A18;
+pin digitB[3] A15;
+pin digitB[4] A12;
+pin digitB[5] A9;
+pin digitB[6] A6;
+pin digitB[7] A3;
+
+pin digitC[0] A28;
+pin digitC[1] A30;
+pin digitC[2] A34;
+pin digitC[3] A37;
+pin digitC[4] A40;
+pin digitC[5] A43;
+pin digitC[6] A46;
+pin digitC[7] A49;
+
+pin digitD[0] A27;
+pin digitD[1] A30;
+pin digitD[2] A33;
+pin digitD[3] A36;
+pin digitD[4] A39;
+pin digitD[5] A42;
+pin digitD[6] A45;
+pin digitD[7] A48;
+
+pin buttonsA[0] B24 pulldown;
+pin buttonsA[1] B21 pulldown;
+pin buttonsA[2] B18 pulldown;
+pin buttonsA[3] B15 pulldown;
+pin buttonsA[4] B12 pulldown;
+pin buttonsA[5] B9 pulldown;
+pin buttonsA[6] B6 pulldown;
+pin buttonsA[7] B3 pulldown;
+pin buttonsA[8] B23 pulldown;
+pin buttonsA[9] B20 pulldown;
+
+pin buttonsB[0] B17 pulldown;
+pin buttonsB[1] B14 pulldown;
+pin buttonsB[2] B11 pulldown;
+pin buttonsB[3] B8 pulldown;
+pin buttonsB[4] B5 pulldown;
+pin buttonsB[5] B2 pulldown;
+pin buttonsB[6] B28 pulldown;
+pin buttonsB[7] B31 pulldown;
+pin buttonsB[8] B34 pulldown;
+pin buttonsB[9] B37 pulldown;
+
+pin buttonConfirm B48 pulldown;
+
+pin buttonReset B45 pulldown;

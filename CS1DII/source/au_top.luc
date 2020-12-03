@@ -1,0 +1,126 @@
+module au_top (
+    input clk,              // 100MHz clock
+    input rst_n,            // reset button (active low)
+    input usb_rx,           // USB->Serial input
+    output usb_tx,          // USB->Serial output
+    output led[8],
+    output outA[10],
+    output outB[10],
+    output digitA[8],
+    output digitB[8],
+    output digitC[8],
+    output digitD[8],
+    input buttonsA[10],
+    input buttonsB[10],
+    input buttonConfirm,
+    input buttonReset
+  ) {
+  sig rst;                  // reset signal
+
+  .clk(clk) {
+    reset_conditioner reset_cond;
+    button_conditioner butconA[10];
+    button_conditioner butconB[10];
+    button_conditioner butconcfm;
+    button_conditioner butconrst;
+    .rst(rst){
+    part2 connections;
+    }
+    
+    fsmCL fsmControl;
+  }
+  verify_input checker;
+  dff input_a[10](#INIT(0), .clk(clk), .rst(rst));
+  dff input_b[10](#INIT(0), .clk(clk), .rst(rst));
+  sig weA, weB;
+  selectiondecoder selectiondecodera;
+  selectiondecoder selectiondecoderb;
+  encoder_custom selectiona;
+  encoder_custom selectionb;
+  always {
+    reset_cond.in = ~rst_n; // input raw inverted reset signal
+    rst = reset_cond.out;   // conditioned reset
+    
+    usb_tx = usb_rx;        // loop serial port
+    butconA.in[9:0] = buttonsA[9:0];
+    butconB.in[9:0] = buttonsB[9:0];
+    butconcfm.in = buttonConfirm;
+    butconrst.in = buttonReset;
+    led = 8h00;
+    weA = butconA.out[9] || butconA.out[8] || butconA.out[7] || butconA.out[6] || butconA.out[5] || butconA.out[4] || butconA.out[3] || butconA.out[2] || butconA.out[1] || butconA.out[0];
+    weB = butconB.out[9] || butconB.out[8] || butconB.out[7] || butconB.out[6] || butconB.out[5] || butconB.out[4] || butconB.out[3] || butconB.out[2] || butconB.out[1] || butconB.out[0];
+    case(weA){
+      b1:
+      input_a.d[9:0] = butconA.out[9:0];
+      b0:
+      input_a.d[9:0] = input_a.q[9:0];
+      default:
+      input_a.d = input_a.q;
+      }
+    case(weB){
+      b1:
+      input_b.d[9:0] = butconB.out[9:0];
+      b0:
+      input_b.d = input_b.q;
+      default:
+      input_b.d = input_b.q;
+    }
+    checker.inputA = input_a.q;
+    checker.inputB = input_b.q;
+    checker.numCheckA = connections.numAcheck;
+    checker.numCheckB = connections.numBcheck;
+    connections.ohtb_A_out[15:4] = 12b0;
+    connections.ohtb_A_out[3:0] = checker.outA;
+    connections.ohtb_B_out[15:4] = 12b0;
+    connections.ohtb_B_out[3:0] = checker.outB; 
+    fsmControl.error = checker.error;
+    fsmControl.confirm = butconcfm.out;
+    fsmControl.z = connections.z;
+    fsmControl.rst = rst;
+    fsmControl.reset = butconrst.out;
+    fsmControl.cmpres = connections.alu[0];
+    connections.fse1 = fsmControl.fse1;
+    connections.fse2 = fsmControl.fse2;
+    connections.alufn = fsmControl.alufn;
+    connections.we = fsmControl.we;
+    connections.asel = fsmControl.asel;
+    connections.bsel = fsmControl.bsel;
+    connections.hen = fsmControl.hen;
+    connections.sse = fsmControl.sse;
+    connections.wna = fsmControl.wna;
+    connections.wnb = fsmControl.wnb;
+    connections.sa = fsmControl.sa;
+    connections.sb = fsmControl.sb;
+    connections.tempen = fsmControl.tempen;
+    connections.inputA[9:0] = input_a.q;
+    connections.inputA[15:10] = 6b0;
+    connections.inputB[9:0] = input_b.q;
+    connections.inputB[15:10] = 6b0;
+    //decoders for selection 7seg
+    selectiona.in = input_a.q;
+    selectiondecodera.in = selectiona.out;
+    //case(checker.errora){
+      //b1:
+      //outA[6:0] = b1111001;
+      //b0:
+      //outA[6:0] =selectiondecodera.out;
+      //default:
+      //outA[6:0] = b1111001; 
+    //}
+    selectionb.in = input_b.q;
+    selectiondecoderb.in = selectionb.out;
+    //case(checker.errorb){
+      //b1:
+      //outA = b1111001;
+      //b0:
+      //outA =selectiondecoderb.out;
+      //default:
+      //outA = b1111001; 
+    //}
+    outA = connections.numAcheck;
+    outB = connections.numBcheck;
+    digitA = connections.digitA; 
+    digitB = connections.digitB;
+    digitC = 8b00000000;
+    digitD = 8b00000000;
+}

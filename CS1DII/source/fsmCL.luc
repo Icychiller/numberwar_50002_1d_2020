@@ -1,0 +1,451 @@
+module fsmCL (
+    input clk,    
+    input rst,       
+    input error,
+    input reset,
+    input confirm,
+    input z,
+    input cmpres,
+    output alufn[6],
+    output asel[2],
+    output bsel[2],
+    output sse,
+    output we, 
+    output hen, 
+    output sa[2], 
+    output sb[2], 
+    output wna[2], 
+    output wnb[2],
+    output fse1[2],
+    output fse2[2],
+    output cfm,
+    output err,
+    output tempen,
+    output resetout
+  ) {
+   counter slowclk(#SIZE(1),#DIV(2),.clk(clk),.rst(rst));
+  fsm gamestate(.clk(slowclk.value),.rst(rst))={RESET,INIT,IDLE,INPUT,CMP,SUBABR,SUBABW,SUBBAR,SUBBAW,MULBR,MULBW,MULAR,MULAW,SCRAR,SCRBR,SCRAW,SCRBW,INPAR,INPAW,INPBR,INPBW,CHECK,OVER};
+   
+  always {
+    resetout = reset;
+    alufn=0;
+    asel=0;
+    bsel=0;
+    sse=0;
+    we=0;
+    hen=0;
+    sa=0;
+    sb=0;
+    wna=0;
+    wnb=0;
+    fse1=0;
+    fse2=0;
+    tempen=0;
+    cfm  =  confirm;
+    err = error;
+    
+    case(gamestate.q){
+      gamestate.RESET:
+        alufn = 6b000010;
+        asel = b11;
+        bsel = b11;
+        sse = 0;
+        fse1 = b10;
+        fse2 = b10;
+        we = 0;
+        hen = 0;
+        sa = b11;
+        sb = b11;
+        wna = 00;
+        wnb = 00;
+        tempen = 0;
+        gamestate.d = gamestate.INIT;
+        
+      gamestate.INIT:
+        alufn=6b000000;
+        asel = b11;
+        bsel = b11;
+        sse = 0;
+        fse1 = b10;
+        fse2 = b10;
+        we = 0;
+        hen = 0;
+        sa = 00;
+        sb = 00;
+        wna = b11;
+        wnb = b11;
+        tempen = 0;
+        gamestate.d = gamestate.IDLE;
+        
+      gamestate.IDLE:
+        alufn=6b000000;
+        asel = b00;
+        bsel = b00;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 0;
+        if(error==0 && confirm==1){
+          gamestate.d=gamestate.INPUT;
+        }
+        else{
+          if(reset==1){
+            gamestate.d=gamestate.RESET;
+          }
+        }
+      gamestate.INPUT:
+        alufn=6b000000;
+        asel = b00;
+        bsel = b00;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 1;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 0;
+        gamestate.d = gamestate.CMP;
+        
+      gamestate.CMP:
+        alufn=6b110101;
+        asel = b00;
+        bsel = b00;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 0;
+        if(cmpres){
+         gamestate.d=gamestate.SUBBAR;
+        }
+        else{
+          gamestate.d=gamestate.SUBABR;
+        }
+        
+      gamestate.SUBABR:
+        alufn=6b000001;
+        asel = b00;
+        bsel = b00;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;  
+        tempen = 1;
+        gamestate.d=gamestate.SUBABW;
+        
+      gamestate.SUBABW:
+        alufn=6b000000;
+        asel = b00;
+        bsel = b00;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 1;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;  
+        tempen = 0;
+        gamestate.d=gamestate.MULBR;
+        
+      gamestate.SUBBAR:
+        alufn=6b000001;
+        asel = b01;
+        bsel = b01;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 1;  
+        gamestate.d=gamestate.SUBBAW;
+        
+        gamestate.SUBBAW:
+        alufn=6b000000;
+        asel = b00;
+        bsel = b00;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 1;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 0;  
+        gamestate.d=gamestate.MULAR;
+        
+      gamestate.MULBR:
+        alufn=6b000010;
+        asel = b01;
+        bsel = b10;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 1;
+        gamestate.d=gamestate.MULBW;
+        
+      gamestate.MULBW:
+        alufn=6b000000;
+        asel = b00;
+        bsel = b00;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 1;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 0;
+        gamestate.d=gamestate.SCRAR;
+        
+      gamestate.MULAR:
+        alufn=6b000010;
+        asel = b00;
+        bsel = b10;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 1; 
+        gamestate.d=gamestate.MULAW;
+        
+        gamestate.MULAW:
+        alufn=6b000000;
+        asel = b00;
+        bsel = b00;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 1;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 0;
+        gamestate.d=gamestate.SCRBR;
+      
+      gamestate.SCRAR:
+        alufn=6b000000;
+        asel = b10;
+        bsel = b10;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 1;
+        gamestate.d=gamestate.SCRAW;
+        
+        gamestate.SCRAW:
+        alufn=6b000000;
+        asel = b11;
+        bsel = b10;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b11;
+        we = 0;
+        hen = 0;
+        sa = b01;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 0;
+        gamestate.d=gamestate.INPAR;
+      
+      gamestate.SCRBR:
+        alufn=6b000000;
+        asel = b10;
+        bsel = b10;
+        sse = 1;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 1;
+        gamestate.d=gamestate.SCRBW;
+        
+        gamestate.SCRBW:
+        alufn=6b000000;
+        asel = b11;
+        bsel = b10;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b11;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = b01;
+        wna = 0;
+        wnb = 0;
+        tempen = 0;
+        gamestate.d=gamestate.INPAR;
+      
+      gamestate.INPAR:
+        alufn=6b000001;
+        asel = b11;
+        bsel = b11;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 1;
+        gamestate.d=gamestate.INPAW;
+        
+      gamestate.INPAW:
+        alufn=6b000000;
+        asel = b11;
+        bsel = b10;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b11;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = b01;
+        wnb = 0;
+        tempen = 0;
+        gamestate.d = gamestate.INPBR;
+      
+      gamestate.INPBR:
+        alufn=6b000001;
+        asel = b11;
+        bsel = b11;
+        sse = 0;
+        fse1 = b01;
+        fse2 = b01;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        tempen = 1;
+        gamestate.d = gamestate.INPBW;
+        
+      gamestate.INPBW:
+        alufn=6b000000;
+        asel = b11;
+        bsel = b10;
+        sse = 0;
+        fse1 = b00;
+        fse2 = b11;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = b01;
+        tempen = 0;
+        gamestate.d = gamestate.CHECK;
+      
+      gamestate.CHECK:
+        alufn=6b000000;
+        asel = b11;
+        bsel = b11;
+        sse = 0;
+        fse1 = b10;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        if(z==0){
+          gamestate.d=gamestate.IDLE;
+        }
+        else{
+          gamestate.d=gamestate.OVER;
+        }
+        
+      gamestate.OVER:
+        alufn=6b000000;
+        asel = b11;
+        bsel = b11;
+        sse = 0;
+        fse1 = b10;
+        fse2 = b00;
+        we = 0;
+        hen = 0;
+        sa = 0;
+        sb = 0;
+        wna = 0;
+        wnb = 0;
+        if(reset==1){
+          gamestate.d=gamestate.RESET;
+        }
+        else{
+          gamestate.d=gamestate.OVER;
+        }
+   
+        
+      default:
+        alufn=0;
+        asel=0;
+        bsel=0;
+        sse=0;
+        we=0;
+        hen=0;
+        sa=0;
+        sb=0;
+        wna=0;
+        wnb=0;
+        fse1=0;
+        fse2=0;
+    }
+  }
+}
