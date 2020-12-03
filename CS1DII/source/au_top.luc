@@ -121,6 +121,9 @@ module au_top (
     outB = connections.numBcheck;
     digitA = connections.digitA; 
     digitB = connections.digitB;
-    digitC = 8b00000000;
-    digitD = 8b00000000;
+    digitC[1:0] =connections.digitC[1:0];
+    digitC[3:2] = connections.digitC[4:3];
+    digitC[4] = 1;
+    digitC[7:5] = connections.digitC[7:5];
+    digitD = connections.digitD;
 }
